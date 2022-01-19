@@ -79,6 +79,7 @@ public class NamesrvStartup {
             return null;
         }
 
+        /*NameServer启动流程——第一步：填充NameServer和NettyServer属性*/
         final NamesrvConfig namesrvConfig = new NamesrvConfig();
         final NettyServerConfig nettyServerConfig = new NettyServerConfig();
         nettyServerConfig.setListenPort(9876);
@@ -136,13 +137,13 @@ public class NamesrvStartup {
         if (null == controller) {
             throw new IllegalArgumentException("NamesrvController is null");
         }
-
+        //NameServer启动流程——第二步：根据启动属性创建NameSrvController并初始化
         boolean initResult = controller.initialize();
         if (!initResult) {
             controller.shutdown();
             System.exit(-3);
         }
-
+        //NameServer启动流程——第三步：注册JVM钩子函数，当JVM进程关闭之前，先将线程池关闭，及时释放资源
         Runtime.getRuntime().addShutdownHook(new ShutdownHookThread(log, new Callable<Void>() {
             @Override
             public Void call() throws Exception {
@@ -150,7 +151,7 @@ public class NamesrvStartup {
                 return null;
             }
         }));
-
+        //启动服务
         controller.start();
 
         return controller;

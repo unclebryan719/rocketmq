@@ -72,11 +72,12 @@ public class NamesrvController {
         );
         this.configuration.setStorePathFromConfig(this.namesrvConfig, "configStorePath");
     }
-
+    /*初始化NamesrvController*/
     public boolean initialize() {
 
+        /*加载KV配置*/
         this.kvConfigManager.load();
-
+        //创建NettyServer网络处理对象
         this.remotingServer = new NettyRemotingServer(this.nettyServerConfig, this.brokerHousekeepingService);
 
         this.remotingExecutor =
@@ -84,6 +85,7 @@ public class NamesrvController {
 
         this.registerProcessor();
 
+        //定时任务：NameServer每隔10s扫描一次Broker，移除处于未激活状态的Broker
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override
@@ -92,6 +94,7 @@ public class NamesrvController {
             }
         }, 5, 10, TimeUnit.SECONDS);
 
+        //定时任务：NameServer每隔10分钟打印一次KV配置
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override
