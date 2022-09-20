@@ -85,7 +85,9 @@ public class NamesrvController {
 
         this.registerProcessor();
 
-        //定时任务：NameServer每隔10s扫描一次Broker，移除处于未激活状态的Broker
+        /**
+         * 定时任务：NameServer每隔10s扫描一次Broker，移除处于未激活状态的Broker
+         */
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override

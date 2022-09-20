@@ -107,12 +107,24 @@ public class BrokerStartup {
                 System.exit(-1);
             }
 
+            /**
+             * Broker配置信息
+             */
             final BrokerConfig brokerConfig = new BrokerConfig();
+            /**
+             * 相对于Producer来讲，Broker作为服务端，负责处理生产者的请求
+             */
             final NettyServerConfig nettyServerConfig = new NettyServerConfig();
+            /**
+             * 相对于NameServer来讲，Broker作为客户端，需要向NameServer上报心跳
+             */
             final NettyClientConfig nettyClientConfig = new NettyClientConfig();
 
             nettyClientConfig.setUseTLS(Boolean.parseBoolean(System.getProperty(TLS_ENABLE,
                 String.valueOf(TlsSystemConfig.tlsMode == TlsMode.ENFORCING))));
+            /**
+             * 生产者通过10911端口，发送消息到Broker
+             */
             nettyServerConfig.setListenPort(10911);
             final MessageStoreConfig messageStoreConfig = new MessageStoreConfig();
 
@@ -147,6 +159,9 @@ public class BrokerStartup {
                 System.exit(-2);
             }
 
+            /**
+             * 从BrokerConfig中获取NameServer的地址
+             */
             String namesrvAddr = brokerConfig.getNamesrvAddr();
             if (null != namesrvAddr) {
                 try {
@@ -211,6 +226,9 @@ public class BrokerStartup {
             MixAll.printObjectProperties(log, nettyClientConfig);
             MixAll.printObjectProperties(log, messageStoreConfig);
 
+            /**
+             * 创建BrokerController
+             */
             final BrokerController controller = new BrokerController(
                 brokerConfig,
                 nettyServerConfig,
@@ -225,6 +243,9 @@ public class BrokerStartup {
                 System.exit(-3);
             }
 
+            /**
+             * 钩子方法，用于在JVM退出时，进行资源的释放
+             */
             Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                 private volatile boolean hasShutdown = false;
                 private AtomicInteger shutdownTimes = new AtomicInteger(0);

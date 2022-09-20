@@ -55,14 +55,21 @@ public class MQFaultStrategy {
         this.sendLatencyFaultEnable = sendLatencyFaultEnable;
     }
 
+    /**
+     * 生产者是如何选择将消息发送到哪个队列的
+     */
     public MessageQueue selectOneMessageQueue(final TopicPublishInfo tpInfo, final String lastBrokerName) {
         if (this.sendLatencyFaultEnable) {
             try {
+                // 去threadLocal获取index，保证线程之间的数据隔离
                 int index = tpInfo.getSendWhichQueue().incrementAndGet();
+                // 遍历需要发送的队列
                 for (int i = 0; i < tpInfo.getMessageQueueList().size(); i++) {
+                    // 对index与队列总数进行取模
                     int pos = Math.abs(index++) % tpInfo.getMessageQueueList().size();
                     if (pos < 0)
                         pos = 0;
+                    // 确定要发送到哪个队列
                     MessageQueue mq = tpInfo.getMessageQueueList().get(pos);
                     if (latencyFaultTolerance.isAvailable(mq.getBrokerName()))
                         return mq;
